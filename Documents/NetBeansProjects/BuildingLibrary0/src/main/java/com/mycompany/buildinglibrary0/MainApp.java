@@ -40,6 +40,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.Node;
 import static javafx.application.Application.launch;
+import javafx.scene.control.TitledPane;
 
 public class MainApp extends Application
 {
@@ -52,7 +53,7 @@ public class MainApp extends Application
     private final DoubleProperty cos = new SimpleDoubleProperty();
     {cos.bind(MathBindings.cos(MathBindings.toRadians(buildingAngle)));}
     
-    private final DoubleProperty cameraAngle = new SimpleDoubleProperty(70);
+    private final DoubleProperty cameraAngle = new SimpleDoubleProperty(20);
     
     private final DoubleProperty cameraSin =new SimpleDoubleProperty();
     {cameraSin.bind(MathBindings.sin(MathBindings.toRadians(cameraAngle)));}
@@ -63,6 +64,8 @@ public class MainApp extends Application
     private final DoubleProperty notreDameYTranslate = new SimpleDoubleProperty(200);
     
     private final DoubleProperty size = new SimpleDoubleProperty(200);
+    
+    private final DoubleProperty zoom = new SimpleDoubleProperty(500);
 
     @Override
     public void start(Stage stage)
@@ -75,14 +78,22 @@ public class MainApp extends Application
 
         Group subRoot = new Group();
         
+        
         VBox sliderArea = new VBox();
-
+        TitledPane sliderWrapper = new TitledPane("controls", sliderArea);
+        
         Label xLabel = new Label("X Offset");
         Slider xSlider = new FocusRejectingSlider(0, 1000, notreDameXTranslate.getValue(), subRoot);
+        xSlider.showTickMarksProperty().set(true);
+        xSlider.showTickLabelsProperty().set(true);
+        xSlider.setMajorTickUnit(100);
         notreDameXTranslate.bind(xSlider.valueProperty());
         
         Label yLabel = new Label("Y Offset");
         Slider ySlider = new FocusRejectingSlider(0, 1000, notreDameYTranslate.getValue(), subRoot);
+        ySlider.showTickMarksProperty().set(true);
+        ySlider.showTickLabelsProperty().set(true);
+        ySlider.setMajorTickUnit(100);
         notreDameYTranslate.bind(ySlider.valueProperty());
         
         Label buildingAngleLabel = new Label("Building Angle");
@@ -97,16 +108,22 @@ public class MainApp extends Application
         Slider sizeSlider = new FocusRejectingSlider(Double.MIN_NORMAL, 1000, size.getValue(), subRoot);
         size.bind(sizeSlider.valueProperty());
         
+        Label zoomLabel = new Label("Zoom");
+        Slider zoomSlider = new FocusRejectingSlider(10, 1000, zoom.getValue(), subRoot);
+        zoom.bind(zoomSlider.valueProperty());
         
-        sliderArea.getChildren().addAll(xLabel, xSlider, yLabel, ySlider, buildingAngleLabel, buildingAngleSlider, cameraAngleLabel,cameraAngleSlider, sizeLabel, sizeSlider);
-        root.getChildren().add(sliderArea);
+        
+        sliderArea.getChildren().addAll(xLabel, xSlider, yLabel, ySlider, buildingAngleLabel, buildingAngleSlider, cameraAngleLabel,cameraAngleSlider, sizeLabel, sizeSlider, zoomLabel, zoomSlider);
+        root.getChildren().add(sliderWrapper);
 
 //        setUpConstraints(root);
         
 
 
-        Scene scene = new Scene(root, 400, 200);
+        Scene scene = new Scene(root, 600, 600);
 
+        Group notreDameTotalPane = new Group();
+        
         Pane image = panify("https://www.petfinder.com/wp-content/uploads/2012/11/140272627-grooming-needs-senior-cat-632x475.jpg");
 
         image.setPrefWidth(50);
@@ -129,10 +146,10 @@ public class MainApp extends Application
         notreDamePane.getTransforms().add(notreDameZ);
         notreDamePane.translateZProperty().bind(notreDame.heightProperty().negate().multiply(MathBindings.sin(MathBindings.toRadians(buildingAngle))));
         notreDamePane.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
-        notreDamePane.translateXProperty().bind(notreDameXTranslate);
-        notreDamePane.translateYProperty().bind(notreDame.prefHeightProperty().multiply(cos).negate().add(notreDameYTranslate).add(notreDame.prefHeightProperty()));
+        //notreDamePane.translateXProperty().bind(notreDameXTranslate);
+        notreDamePane.translateYProperty().bind(notreDame.prefHeightProperty().multiply(cos).negate().add(notreDame.prefHeightProperty()));
 
-        subRoot.getChildren().add(notreDamePane);
+        notreDameTotalPane.getChildren().add(notreDamePane);
 
         Pane notreDameRight = panify("http://cloud.graphicleftovers.com/15054/81254/color-square-tiles-pattern.jpg");
         Pane notreDameRightPane = new Pane(notreDameRight);
@@ -143,7 +160,7 @@ public class MainApp extends Application
         notreDameRightShear.yProperty().bind(cos.negate().divide(sin));
         Scale notreDameRightScale = new Scale();
         notreDameRightScale.yProperty().bind(notreDame.heightProperty().divide(notreDame.widthProperty()));
-        notreDameRightScale.xProperty().bind(notreDameRightScale.yProperty());
+        //notreDameRightScale.xProperty().bind(notreDameRightScale.yProperty());
 
         notreDameRightShear.pivotYProperty().bind(notreDameRightPane.translateYProperty());
         Scale notreDameRightScale2 = new Scale(0,1);
@@ -151,10 +168,10 @@ public class MainApp extends Application
         notreDameRight.getTransforms().addAll(notreDameRightShear, notreDameRightScale2);
 
         notreDameRightPane.getTransforms().addAll(notreDameRightX, notreDameRightScale);
-        notreDameRightPane.translateXProperty().bind(notreDame.prefWidthProperty().add(notreDamePane.translateXProperty()));
-        notreDameRightPane.translateYProperty().bind(notreDameRight.prefHeightProperty().negate().add(notreDameYTranslate).add(notreDame.prefHeightProperty()));
+        notreDameRightPane.translateXProperty().bind(notreDame.prefWidthProperty());
+        notreDameRightPane.translateYProperty().bind(notreDameRight.prefHeightProperty().negate().add(notreDame.prefHeightProperty()));
 
-        subRoot.getChildren().add(notreDameRightPane);
+        notreDameTotalPane.getChildren().add(notreDameRightPane);
 
         Pane notreDameLeft = panify("http://cloud.graphicleftovers.com/15054/81254/color-square-tiles-pattern.jpg");
         Pane notreDameLeftPane = new Pane(notreDameLeft);
@@ -170,10 +187,10 @@ public class MainApp extends Application
         notreDameLeftScale.xProperty().bind(sin);
         notreDameLeft.getTransforms().addAll(notreDameLeftShear, notreDameLeftScale);//, new Rotate(-buildingAngle, Rotate.Z_AXIS));
         notreDameLeftPane.getTransforms().addAll(notreDameLeftX);//, new Rotate(buildingAngle, Rotate.Z_AXIS));
-        notreDameLeftPane.translateXProperty().bind(notreDamePane.translateXProperty());
-        notreDameLeftPane.translateYProperty().bind(notreDameLeft.prefHeightProperty().negate().add(notreDameYTranslate).add(notreDame.prefHeightProperty()));
+        //notreDameLeftPane.translateXProperty().bind(notreDamePane.translateXProperty());
+        notreDameLeftPane.translateYProperty().bind(notreDameLeft.prefHeightProperty().negate().add(notreDame.prefHeightProperty()));
 
-        subRoot.getChildren().add(notreDameLeftPane);
+        notreDameTotalPane.getChildren().add(notreDameLeftPane);
 
         Pane notreDameTop = panify("http://cloud.graphicleftovers.com/15054/81254/color-square-tiles-pattern.jpg");
 
@@ -182,13 +199,19 @@ public class MainApp extends Application
         notreDameTop.prefHeightProperty().bind(notreDame.heightProperty());
 
         notreDameTop.translateZProperty().bind(notreDame.prefHeightProperty().multiply(sin).negate());
-        notreDameTop.translateYProperty().bind(notreDame.prefHeightProperty().multiply(cos).negate().add(notreDameYTranslate));
-        notreDameTop.translateXProperty().bind(notreDameXTranslate);
+        notreDameTop.translateYProperty().bind(notreDame.prefHeightProperty().multiply(cos).negate());
+        //notreDameTop.translateXProperty().bind(notreDameXTranslate);
 
-        subRoot.getChildren().add(notreDameTopPane);
-
+        notreDameTotalPane.getChildren().add(notreDameTopPane);
+        subRoot.getChildren().add(notreDameTotalPane);
+        
+        notreDameTotalPane.translateXProperty().bind(notreDameXTranslate);
+        notreDameTotalPane.translateYProperty().bind(notreDameYTranslate);
+        
+        
         SubScene subScene = new SubScene(subRoot, 350, 250, true, SceneAntialiasing.BALANCED);
         Pane subPane = new Pane(subScene);
+        
         subScene.widthProperty().bind(subPane.widthProperty());
         subScene.heightProperty().bind(subPane.heightProperty());
         subPane.minWidthProperty().set(200);
@@ -199,7 +222,7 @@ public class MainApp extends Application
         PerspectiveCamera camera = new PerspectiveCamera();
 
         camera.setFieldOfView(40);
-        camera.setTranslateZ(-500);
+        camera.translateZProperty().bind(zoom.negate());
         Rotate cameraRotate = new Rotate(0, Rotate.X_AXIS);
         cameraRotate.angleProperty().bind(cameraAngle);
         camera.getTransforms().add(cameraRotate);
