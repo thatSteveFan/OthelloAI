@@ -26,93 +26,138 @@ import javafx.scene.transform.Shear;
 public class Building extends Region
 {
 
-    public static final double DEFAULT_SIZE = 100;
     public static final double DEFAULT_ANGLE = 70;
-    
-    
-    private final ObjectProperty<Image> image = new SimpleObjectProperty<>();
-    private final DoubleProperty size = new SimpleDoubleProperty();
+    public static final double DEFAULT_X = 0;
+    public static final double DEFAULT_Y = 0;
+
+    private final ObjectProperty<Image> leftImage = new SimpleObjectProperty<>();
+    private final ObjectProperty<Image> rightImage = new SimpleObjectProperty<>();
+    private final ObjectProperty<Image> topImage = new SimpleObjectProperty<>();
+    private final ObjectProperty<Image> frontImage = new SimpleObjectProperty<>();
+    private final DoubleProperty depth = new SimpleDoubleProperty();
     private final DoubleProperty angle = new SimpleDoubleProperty();
 
+    
     public Building(Image image)
     {
-       this(image, DEFAULT_SIZE); 
-       
+        this(image, image, image, image);
     }
     
-    public Building(Image image, double size)
+    public Building(Image front,Image left,Image top,Image right)
     {
-        this(image, size, DEFAULT_ANGLE);
+        this(front, left, top, right, DEFAULT_ANGLE);
     }
     
-    public Building(Image image, double size, double angle)
+    public Building(Image front,Image left,Image top,Image right, Double angle)
     {
-        this(image, size, angle, 0, 0);
+        this(front, left, top, right, angle, DEFAULT_X, DEFAULT_Y);
     }
     
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Building(Image image, double size, double angle, double x, double y)
+    public Building(Image front,Image left,Image top,Image right, Double angle, double x, double y)
     {
-        super();
-        this.image.setValue(image);
-        this.size.setValue(size);
+        frontImage.setValue(front);
+        leftImage.setValue(left);
+        topImage.setValue(top);
+        rightImage.setValue(right);
         this.angle.setValue(angle);
-        super.setTranslateX(x);
-        super.setTranslateX(y);
+        translateXProperty().set(x);
+        translateYProperty().set(y);
         
         
-        
-        Group root = makeBuilding();
+        Group root = new Group(makeBuilding());
         getChildren().add(root);
         
         
     }
     
-    
-    public double getAngle()
+    public Image getLeftImage()
     {
-        return angle.get();
+        return leftImage.getValue();
+    }
+    
+    public void setLeftImage(Image value)
+    {
+        leftImage.setValue(value);
+    }
+    
+    public ObjectProperty<Image> leftImageProperty()
+    {
+        return leftImage;
+    }
+    
+    public Image getRightImage()
+    {
+        return rightImage.getValue();
+    }
+    
+    public void setRightImage(Image value)
+    {
+        rightImage.setValue(value);
+    }
+    
+    public ObjectProperty<Image> rightImageProperty()
+    {
+        return rightImage;
+    }
+    
+    public Image getTopImage()
+    {
+        return topImage.getValue();
+    }
+    
+    public void setTopImage(Image value)
+    {
+        topImage.setValue(value);
+    }
+    
+    public ObjectProperty<Image> topImageProperty()
+    {
+        return topImage;
+    }
+    
+    public Image getFrontImage()
+    {
+        return frontImage.getValue();
+    }
+    
+    public void setFrontImage(Image value)
+    {
+        frontImage.setValue(value);
+    }
+    
+    public ObjectProperty<Image> frontImageProperty()
+    {
+        return frontImage;
+    }
+    
+    public final void setDepth(Double value)
+    {
+        depth.set(value);
     }
 
-    public void setAngle(double value)
+    public final Double getDepth()
+    {
+        return depth.get();
+    }
+
+    public final DoubleProperty depthProperty()
+    {
+        return depth;
+    }
+
+    public final void setAngle(Double value)
     {
         angle.set(value);
     }
 
-    public DoubleProperty angleProperty()
+    public final Double getAngle()
+    {
+        return angle.get();
+    }
+
+    public final DoubleProperty angleProperty()
     {
         return angle;
-    }
-
-    public double getSize()
-    {
-        return size.get();
-    }
-
-    public void setSize(double value)
-    {
-        size.set(value);
-    }
-
-    public DoubleProperty sizeProperty()
-    {
-        return size;
-    }
-
-
-    public Image getImage()
-    {
-        return image.get();
-    }
-
-    public void setImage(Image value)
-    {
-        image.set(value);
-    }
-
-    public ObjectProperty<Image> imageProperty()
-    {
-        return image;
     }
 
     private Group makeBuilding()
@@ -123,11 +168,11 @@ public class Building extends Region
 
     public Node makeLeft()
     {
-        
+
         ImageView leftSide = new ImageView();
-        leftSide.imageProperty().bind(this.image);
-        leftSide.fitHeightProperty().bind(this.size);
-        leftSide.fitWidthProperty().bind(this.size);
+        leftSide.imageProperty().bind(this.leftImage);
+        leftSide.fitHeightProperty().bind(this.width);
+        leftSide.fitWidthProperty().bind(this.width);
         Group leftGroup = new Group(leftSide);
         Shear leftSideShear = new Shear();
         leftSideShear.yProperty().bind(MathBindings.cos(MathBindings.toRadians(angle)).negate().divide(MathBindings.sin(MathBindings.toRadians(angle))));
@@ -137,17 +182,17 @@ public class Building extends Region
         leftSide.getTransforms().addAll(leftSideShear, leftSideScale);
         Rotate leftSideRotate = new Rotate(90, Rotate.Y_AXIS);
         leftGroup.getTransforms().add(leftSideRotate);
-        leftGroup.translateYProperty().bind(leftSide.fitHeightProperty().negate().add(size));
+        leftGroup.translateYProperty().bind(leftSide.fitHeightProperty().negate().add(width));
         return leftGroup;
     }
-    
+
     public Node makeFront()
     {
-        
+
         ImageView front = new ImageView();
-        front.imageProperty().bind(image);
-        front.fitHeightProperty().bind(this.size);
-        front.fitWidthProperty().bind(this.size);
+        front.imageProperty().bind(frontImage);
+        front.fitHeightProperty().bind(this.width);
+        front.fitWidthProperty().bind(this.width);
         Rotate frontRotate = new Rotate(0, Rotate.X_AXIS);
         front.getTransforms().add(frontRotate);
         front.translateZProperty().bind(front.fitHeightProperty().negate().multiply(MathBindings.sin(MathBindings.toRadians(angle))));
@@ -155,17 +200,17 @@ public class Building extends Region
         frontRotate.angleProperty().bind(angle);
         return front;
     }
-    
+
     public Node makeRight()
     {
-        ImageView rightSide = new ImageView(image.getValue());
-        rightSide.imageProperty().bind(this.image);
-        rightSide.fitHeightProperty().bind(this.size);
-        rightSide.fitWidthProperty().bind(this.size);
-        
+        ImageView rightSide = new ImageView();
+        rightSide.imageProperty().bind(rightImage);
+        rightSide.fitHeightProperty().bind(this.width);
+        rightSide.fitWidthProperty().bind(this.width);
+
         Group rightGroup = new Group(rightSide);
         Shear rightSideShear = new Shear();
-        
+
         rightSideShear.yProperty().bind(MathBindings.cos(MathBindings.toRadians(angle)).negate().divide(MathBindings.sin(MathBindings.toRadians(angle))));
         rightSideShear.pivotYProperty().bind(rightGroup.translateYProperty());
         Scale rightSideScale = new Scale(Double.NaN, 1);
@@ -173,25 +218,23 @@ public class Building extends Region
         rightSide.getTransforms().addAll(rightSideShear, rightSideScale);
         Rotate leftSideRotate = new Rotate(90, Rotate.Y_AXIS);
         rightGroup.getTransforms().add(leftSideRotate);
-        rightGroup.translateYProperty().bind(rightSide.fitHeightProperty().negate().add(size));
-        rightGroup.translateXProperty().bind((size));
-        
+        rightGroup.translateYProperty().bind(rightSide.fitHeightProperty().negate().add(width));
+        rightGroup.translateXProperty().bind((width));
+
         return rightGroup;
     }
-    
+
     public Node makeTop()
     {
         ImageView top = new ImageView();
-        top.imageProperty().bind(image);
-        top.fitHeightProperty().bind(this.size);
-        top.fitWidthProperty().bind(this.size);
-        top.translateYProperty().bind(size.multiply(MathBindings.cos(MathBindings.toRadians(angle))).negate());
-        top.translateZProperty().bind(size.multiply(MathBindings.sin(MathBindings.toRadians(angle))).negate());
-        
-        
-        
+        top.imageProperty().bind(topImage);
+        top.fitHeightProperty().bind(this.width);
+        top.fitWidthProperty().bind(this.width);
+        top.translateYProperty().bind(width.multiply(MathBindings.cos(MathBindings.toRadians(angle))).negate());
+        top.translateZProperty().bind(width.multiply(MathBindings.sin(MathBindings.toRadians(angle))).negate());
+
         Group topGroup = new Group(top);
-        
+
         return topGroup;
     }
 }
