@@ -11,6 +11,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
@@ -49,6 +50,7 @@ public class Building extends Region
         this(image, size, angle, 0, 0);
     }
     
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public Building(Image image, double size, double angle, double x, double y)
     {
         super();
@@ -115,22 +117,12 @@ public class Building extends Region
 
     private Group makeBuilding()
     {
-        Group root = new Group();
-        
-        
-        
-        ImageView front = new ImageView();
-        front.imageProperty().bind(image);
-        front.fitHeightProperty().bind(this.size);
-        front.fitWidthProperty().bind(this.size);
-        Rotate frontRotate = new Rotate(0, Rotate.X_AXIS);
-        front.getTransforms().add(frontRotate);
-        front.translateZProperty().bind(front.fitHeightProperty().negate().multiply(MathBindings.sin(MathBindings.toRadians(angle))));
-        front.translateYProperty().bind(front.fitHeightProperty().negate().multiply(MathBindings.cos(MathBindings.toRadians(angle))).add(front.fitHeightProperty()));
-        frontRotate.angleProperty().bind(angle);
-        
-        root.getChildren().add(front);
-        
+        Group root = new Group(makeFront(), makeLeft(), makeTop(), makeRight());
+        return root;
+    }
+
+    public Node makeLeft()
+    {
         
         ImageView leftSide = new ImageView();
         leftSide.imageProperty().bind(this.image);
@@ -145,17 +137,61 @@ public class Building extends Region
         leftSide.getTransforms().addAll(leftSideShear, leftSideScale);
         Rotate leftSideRotate = new Rotate(90, Rotate.Y_AXIS);
         leftGroup.getTransforms().add(leftSideRotate);
-        leftGroup.translateYProperty().bind(leftSide.fitHeightProperty().negate().add(front.fitHeightProperty()));
-        
-        
-        root.getChildren().add(leftGroup);
-        
-        
-        
-        
-        
-        return root;
+        leftGroup.translateYProperty().bind(leftSide.fitHeightProperty().negate().add(size));
+        return leftGroup;
     }
-
     
+    public Node makeFront()
+    {
+        
+        ImageView front = new ImageView();
+        front.imageProperty().bind(image);
+        front.fitHeightProperty().bind(this.size);
+        front.fitWidthProperty().bind(this.size);
+        Rotate frontRotate = new Rotate(0, Rotate.X_AXIS);
+        front.getTransforms().add(frontRotate);
+        front.translateZProperty().bind(front.fitHeightProperty().negate().multiply(MathBindings.sin(MathBindings.toRadians(angle))));
+        front.translateYProperty().bind(front.fitHeightProperty().negate().multiply(MathBindings.cos(MathBindings.toRadians(angle))).add(front.fitHeightProperty()));
+        frontRotate.angleProperty().bind(angle);
+        return front;
+    }
+    
+    public Node makeRight()
+    {
+        ImageView rightSide = new ImageView(image.getValue());
+        rightSide.imageProperty().bind(this.image);
+        rightSide.fitHeightProperty().bind(this.size);
+        rightSide.fitWidthProperty().bind(this.size);
+        
+        Group rightGroup = new Group(rightSide);
+        Shear rightSideShear = new Shear();
+        
+        rightSideShear.yProperty().bind(MathBindings.cos(MathBindings.toRadians(angle)).negate().divide(MathBindings.sin(MathBindings.toRadians(angle))));
+        rightSideShear.pivotYProperty().bind(rightGroup.translateYProperty());
+        Scale rightSideScale = new Scale(Double.NaN, 1);
+        rightSideScale.xProperty().bind(MathBindings.sin(MathBindings.toRadians(angle)));
+        rightSide.getTransforms().addAll(rightSideShear, rightSideScale);
+        Rotate leftSideRotate = new Rotate(90, Rotate.Y_AXIS);
+        rightGroup.getTransforms().add(leftSideRotate);
+        rightGroup.translateYProperty().bind(rightSide.fitHeightProperty().negate().add(size));
+        rightGroup.translateXProperty().bind((size));
+        
+        return rightGroup;
+    }
+    
+    public Node makeTop()
+    {
+        ImageView top = new ImageView();
+        top.imageProperty().bind(image);
+        top.fitHeightProperty().bind(this.size);
+        top.fitWidthProperty().bind(this.size);
+        top.translateYProperty().bind(size.multiply(MathBindings.cos(MathBindings.toRadians(angle))).negate());
+        top.translateZProperty().bind(size.multiply(MathBindings.sin(MathBindings.toRadians(angle))).negate());
+        
+        
+        
+        Group topGroup = new Group(top);
+        
+        return topGroup;
+    }
 }

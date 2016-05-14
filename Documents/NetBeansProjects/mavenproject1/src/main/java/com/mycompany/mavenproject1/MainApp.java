@@ -84,7 +84,7 @@ public class MainApp extends Application
         Group subRoot = new Group();
 
         VBox sliderArea = sliderArea(subRoot);
-        TitledPane sliderWrapper = new TitledPane("controls", sliderArea);
+        TitledPane sliderWrapper = new FoucsRejectingTitledPane("controls", sliderArea, subRoot);
 
         root.getChildren().add(sliderWrapper);
 
@@ -112,7 +112,16 @@ public class MainApp extends Application
 
         subRoot.getChildren().add(notreDame);
 
-        SubScene subScene = new SubScene(subRoot, 350, 250, true, SceneAntialiasing.BALANCED);
+        Building secondBuilding = new Building(new Image("http://cloud.graphicleftovers.com/15054/81254/color-square-tiles-pattern.jpg"));
+        secondBuilding.angleProperty().bind(buildingAngle);
+        secondBuilding.sizeProperty().bind(size.multiply(3));
+        secondBuilding.translateXProperty().bind(notreDameXTranslate.add(size.multiply(1.5)));
+        secondBuilding.translateYProperty().bind(notreDameYTranslate.add(size.multiply(1.5)));
+        
+        subRoot.getChildren().add(secondBuilding);
+        
+        
+        SubScene subScene = new SubScene(subRoot, 350, 250, true, SceneAntialiasing.DISABLED);
         Pane subPane = new Pane(subScene);
 
         subScene.widthProperty().bind(subPane.widthProperty());
@@ -151,14 +160,14 @@ public class MainApp extends Application
         IntegerProperty startMouseX = new SimpleIntegerProperty();
         IntegerProperty startMouseY = new SimpleIntegerProperty();
 
-        Property<MyRotations> currentRotation = new SimpleObjectProperty<>();
+        Property<AxisRotates> currentRotation = new SimpleObjectProperty<>();
 
         subScene.onMousePressedProperty().set(e
                 -> 
                 {
                     startMouseX.set((int) e.getSceneX());
                     startMouseY.set((int) e.getSceneY());
-                    MyRotations r = new MyRotations();
+                    AxisRotates r = new AxisRotates();
                     camera.getTransforms().addAll(r);
                     currentRotation.setValue(r);
                     //System.out.println("pressed");
@@ -190,41 +199,19 @@ public class MainApp extends Application
                 {
                     //System.out.println("Key Pressed");
 
-                    if (e.getCode() == KeyCode.UP)
+                    switch(e.getCode())
                     {
-                        upKeyDown.setValue(Boolean.TRUE);
+                        case UP:upKeyDown.setValue(true);break;
+                        case LEFT: leftKeyDown.setValue(true);break;
+                        case DOWN:downKeyDown.setValue(true);break;
+                        case RIGHT:rightKeyDown.setValue(true);break;
+                        case W:wKeyDown.setValue(true);break;
+                        case A:aKeyDown.setValue(true);break;
+                        case S:sKeyDown.setValue(true);break;
+                        case D:dKeyDown.setValue(true);break;
                     }
-                    if (e.getCode() == KeyCode.LEFT)
-                    {
-                        leftKeyDown.setValue(Boolean.TRUE);
-                    }
-                    if (e.getCode() == KeyCode.DOWN)
-                    {
-                        downKeyDown.setValue(Boolean.TRUE);
-                    }
-                    if (e.getCode() == KeyCode.RIGHT)
-                    {
-                        rightKeyDown.setValue(Boolean.TRUE);
-                    }
-
-                    if (e.getCode() == KeyCode.W)
-                    {
-                        wKeyDown.setValue(Boolean.TRUE);
-                    }
-                    if (e.getCode() == KeyCode.A)
-                    {
-                        aKeyDown.setValue(Boolean.TRUE);
-                    }
-
-                    if (e.getCode() == KeyCode.S)
-                    {
-                        sKeyDown.setValue(Boolean.TRUE);
-                    }
-
-                    if (e.getCode() == KeyCode.D)
-                    {
-                        dKeyDown.setValue(Boolean.TRUE);
-                    }
+                    
+                    
 
                     if (e.getCode() == KeyCode.P)
                     {
@@ -236,45 +223,18 @@ public class MainApp extends Application
         subScene.onKeyReleasedProperty().set(e
                 -> 
                 {
-                    if (e.getCode() == KeyCode.UP)
+                    switch(e.getCode())
                     {
-                        upKeyDown.setValue(Boolean.FALSE);
+                        case UP:upKeyDown.setValue(false);break;
+                        case LEFT: leftKeyDown.setValue(false);break;
+                        case DOWN:downKeyDown.setValue(false);break;
+                        case RIGHT:rightKeyDown.setValue(false);break;
+                        case W:wKeyDown.setValue(false);break;
+                        case A:aKeyDown.setValue(false);break;
+                        case S:sKeyDown.setValue(false);break;
+                        case D:dKeyDown.setValue(false);break;
                     }
-                    if (e.getCode() == KeyCode.LEFT)
-                    {
-                        leftKeyDown.setValue(Boolean.FALSE);
-                    }
-                    if (e.getCode() == KeyCode.DOWN)
-                    {
-                        downKeyDown.setValue(Boolean.FALSE);
-                    }
-                    if (e.getCode() == KeyCode.RIGHT)
-                    {
-                        rightKeyDown.setValue(Boolean.FALSE);
-                    }
-
-                    if (e.getCode() == KeyCode.W)
-                    {
-                        wKeyDown.setValue(Boolean.FALSE);
-                    }
-                    if (e.getCode() == KeyCode.A)
-                    {
-                        aKeyDown.setValue(Boolean.FALSE);
-                    }
-
-                    if (e.getCode() == KeyCode.S)
-                    {
-                        sKeyDown.setValue(Boolean.FALSE);
-                    }
-
-                    if (e.getCode() == KeyCode.D)
-                    {
-                        dKeyDown.setValue(Boolean.FALSE);
-                    }
-                    if (e.getCode() == KeyCode.ESCAPE)
-                    {
-                        root.requestFocus();
-                    }
+                    
         });
 
         subScene.setOnMouseClicked(e -> subScene.requestFocus());
@@ -374,10 +334,12 @@ public class MainApp extends Application
         size.bind(sizeSlider.valueProperty());
 
         Label zoomLabel = new Label("Zoom");
-        Slider zoomSlider = new FocusRejectingSlider(10, 1000, zoom.getValue(), focusser);
+        Slider zoomSlider = new FocusRejectingSlider(10, 5000, zoom.getValue(), focusser);
         zoom.bind(zoomSlider.valueProperty());
 
-        return new VBox(xLabel, xSlider, yLabel, ySlider, buildingAngleLabel, buildingAngleSlider, cameraAngleLabel, cameraAngleSlider, sizeLabel, sizeSlider, zoomLabel, zoomSlider);
+        return new VBox(xLabel, xSlider, yLabel, ySlider, buildingAngleLabel,
+                        buildingAngleSlider, cameraAngleLabel, cameraAngleSlider,
+                        sizeLabel, sizeSlider, zoomLabel, zoomSlider);
     }
 
     private GridPane grid(double size)
@@ -402,89 +364,5 @@ public class MainApp extends Application
         temp.getRowConstraints().addAll(rList);
 
         return temp;
-    }
-}
-
-/**
- * A slider that rejects focus and instead moves it to another node
- *
- * @author pramukh
- */
-class FocusRejectingSlider extends Slider
-{
-
-    public FocusRejectingSlider(Node focusRequester)
-    {
-        super();
-        onMouseReleasedProperty().set(e
-                -> 
-                {
-                    focusRequester.requestFocus();
-                    System.out.println("SliderReleased");
-        });
-    }
-
-    public FocusRejectingSlider(double min, double max, double value, Node focusRequester)
-    {
-        super(min, max, value);
-        onMouseReleasedProperty().set(e
-                -> 
-                {
-                    focusRequester.requestFocus();
-                    System.out.println("SliderReleased");
-        });
-    }
-
-}
-
-class MyRotations extends ArrayList<Rotate>
-{
-
-    private static final long serialVersionUID = 1L;
-    final public Property<Rotate> xRotate;
-    final public Property<Rotate> yRotate;
-    final public Property<Rotate> zRotate;
-
-    public MyRotations()
-    {
-        super();
-        xRotate = new SimpleObjectProperty<>(new Rotate(0, Rotate.X_AXIS));
-        yRotate = new SimpleObjectProperty<>(new Rotate(0, Rotate.Y_AXIS));
-        zRotate = new SimpleObjectProperty<>(new Rotate(0, Rotate.Z_AXIS));
-
-        super.add(xRotate.getValue());
-        super.add(yRotate.getValue());
-        super.add(zRotate.getValue());
-
-    }
-
-    public double getX()
-    {
-        return xRotate.getValue().getAngle();
-    }
-
-    public double getY()
-    {
-        return yRotate.getValue().getAngle();
-    }
-
-    public double getZ()
-    {
-        return zRotate.getValue().getAngle();
-    }
-
-    public void setX(int x)
-    {
-        xRotate.getValue().setAngle(x);
-    }
-
-    public void setY(int y)
-    {
-        yRotate.getValue().setAngle(y);
-    }
-
-    public void setZ(int z)
-    {
-        zRotate.getValue().setAngle(z);
     }
 }
