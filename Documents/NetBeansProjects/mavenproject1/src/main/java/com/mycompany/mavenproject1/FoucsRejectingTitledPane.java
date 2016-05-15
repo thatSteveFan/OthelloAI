@@ -13,7 +13,7 @@ import javafx.scene.control.TitledPane;
  *
  * @author pramukh
  */
-public class FoucsRejectingTitledPane extends TitledPane
+class FoucsRejectingTitledPane extends TitledPane
 {
 
     public FoucsRejectingTitledPane(Node taker)

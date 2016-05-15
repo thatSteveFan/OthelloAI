@@ -14,7 +14,7 @@ import javafx.scene.transform.Rotate;
  *
  * @author pramukh
  */
-public class AxisRotates extends ArrayList<Rotate>
+class AxisRotates extends ArrayList<Rotate>
 {
 
     private static final long serialVersionUID = 1L;

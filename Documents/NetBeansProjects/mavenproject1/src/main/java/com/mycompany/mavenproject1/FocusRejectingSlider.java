@@ -13,7 +13,7 @@ import javafx.scene.control.Slider;
  *
  * @author pramukh
  */
-public class FocusRejectingSlider extends Slider
+class FocusRejectingSlider extends Slider
 {
 
     public FocusRejectingSlider(Node focusRequester)
