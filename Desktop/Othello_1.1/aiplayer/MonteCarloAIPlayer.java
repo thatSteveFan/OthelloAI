@@ -111,6 +111,11 @@ public class MonteCarloAIPlayer extends AIPlayer
         
     }
     
+    private Location diff(int[][] old, int[][] new)
+    {
+        
+    }
+    
     private <T> T getRandom(List<? extends T> list)
     {
         return list.get((int)(Math.random() * list.size()));
